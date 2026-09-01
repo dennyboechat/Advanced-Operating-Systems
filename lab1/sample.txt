@@ -1,0 +1,11 @@
+the quick brown fox jumps over the lazy dog
+the dog barks and the fox runs away
+a quick brown dog jumps over a lazy fox
+the lazy dog sleeps while the quick fox runs
+operating systems manage processes and threads
+threads share memory while processes do not
+a thread is the smallest unit of execution
+the operating system schedules threads on the cpu
+concurrency and parallelism are not the same thing
+concurrency is about dealing with many things at once
+parallelism is about doing many things at once
