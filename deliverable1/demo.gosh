@@ -1,0 +1,53 @@
+# A scripted tour of gosh: run it with `./gosh demo.gosh`.
+# Everything below is executed by the shell itself, not by bash.
+
+echo "=== 1. Working directory ==="
+pwd
+mkdir -p playground/inner
+cd playground
+pwd
+cd -
+
+echo
+echo "=== 2. Files ==="
+touch playground/notes.txt
+echo "the first line" > playground/notes.txt
+echo "the second line" >> playground/notes.txt
+cat playground/notes.txt
+ls playground
+ls -l playground
+
+echo
+echo "=== 3. Environment and expansion ==="
+export GREETING=hello
+echo "$GREETING from $USER, working in $PWD"
+echo 'single quotes keep $GREETING literal'
+
+echo
+echo "=== 4. External programs (fork + exec + wait) ==="
+uname -s
+/usr/bin/wc -l < playground/notes.txt
+echo "exit status of a program that fails:"
+false
+echo "  \$? = $?"
+
+echo
+echo "=== 5. Background execution and the process table ==="
+sleep 30 &
+sleep 40 &
+jobs
+ps
+kill %1
+kill -KILL %2
+sleep 1
+echo "after the signals were delivered and the children reaped:"
+jobs
+
+echo
+echo "=== 6. Cleanup ==="
+rm playground/notes.txt
+rmdir playground/inner
+rmdir playground
+ls playground
+echo "  (the error above is expected: the directory is gone)"
+exit 0
