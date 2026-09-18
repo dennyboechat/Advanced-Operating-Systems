@@ -1,4 +1,4 @@
-// Lab 2 - CPU scheduling algorithms.
+// Deliverable 2 - CPU scheduling algorithms.
 //
 // Round robin: each process is given a time slice (quantum) chosen by the user
 // on the command line. When the slice expires the scheduler switches to the

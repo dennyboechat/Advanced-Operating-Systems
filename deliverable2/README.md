@@ -1,4 +1,4 @@
-# Lab 2 — CPU Scheduling (Go)
+# Deliverable 2 — CPU Scheduling (Go)
 
 A CPU scheduler simulator with two algorithms and two execution engines.
 
