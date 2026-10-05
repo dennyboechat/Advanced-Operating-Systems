@@ -1,0 +1,89 @@
+# A scripted tour of Deliverable 4. Run it as the administrator:
+#
+#   ./aos shell -user admin demo.gosh            (password: admin123)
+#   echo admin123 | ./aos shell -user admin demo.gosh
+#
+# Everything below is executed by the aos shell itself, not by bash. Lines
+# after "su alice" run as alice until the matching "exit". The errors printed
+# along the way are the point: they are the permission checks at work.
+
+echo "=== 1. Users ==="
+whoami
+id
+users
+
+echo
+echo "=== 2. Pipes (as alice, a standard user) ==="
+su - alice
+echo "$ ls | grep txt"
+ls | grep txt
+echo
+echo "$ cat /var/log/app.log | grep error | sort"
+cat /var/log/app.log | grep error | sort
+echo
+echo "$ cat /var/log/app.log | grep error | cut -c21- | sort | uniq -c | sort -rn"
+cat /var/log/app.log | grep error | cut -c21- | sort | uniq -c | sort -rn
+echo
+echo "$ seq 1 1000 | grep 7 | wc -l          (a host program feeding built-ins)"
+seq 1 1000 | grep 7 | wc -l
+echo "$ yes | head -n 2                      (head exits, so yes gets SIGPIPE)"
+yes | head -n 2
+echo "$ ls -l /etc | grep root | sort -r > /tmp/etc.txt"
+ls -l /etc | grep root | sort -r > /tmp/etc.txt
+wc -l < /tmp/etc.txt
+rm /tmp/etc.txt
+echo "$ mem -algo both -frames 3 -refs '7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1' | grep 'Page faults'"
+mem -algo both -frames 3 -refs "7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1" | grep "Page faults"
+
+echo
+echo "=== 3. File permissions (still alice) ==="
+ls -l /etc
+echo "--- system files: readable, but not writable"
+cat /etc/motd | head -n 1
+echo "max_processes=999" >> /etc/system.conf
+rm /etc/motd
+cat /etc/shadow
+echo "--- another user's home directory (mode 700)"
+ls /home/bob
+cat /home/bob/secret.txt
+echo "--- execute permission"
+./hello.gosh
+chmod u+x hello.gosh
+./hello.gosh first second
+chmod 644 hello.gosh
+echo "--- sharing a file with the group"
+echo "draft plan" > /shared/plan.txt
+chmod 640 /shared/plan.txt
+ls -l /shared/plan.txt
+echo "--- programs: standard users may only run vetted ones"
+find /
+exit
+
+echo
+echo "=== 4. Group access (as bob, in alice's group 'users') ==="
+su bob
+cat /shared/plan.txt
+echo "bob's edit" >> /shared/plan.txt
+exit
+
+echo
+echo "=== 5. Guest (read-only account) ==="
+su guest
+cat /shared/plan.txt
+cat /etc/motd | wc -l
+touch /tmp/guest.txt
+date
+exit
+
+echo
+echo "=== 6. Administrator ==="
+whoami
+echo "verbose=1" > /etc/demo.conf
+ls -l /etc/demo.conf
+rm /etc/demo.conf
+cat /home/bob/secret.txt
+chown bob /shared/plan.txt
+stat /shared/plan.txt
+rm /shared/plan.txt
+echo "--- the audit log (root only): the last few refusals"
+grep DENIED /var/log/auth.log | tail -n 5

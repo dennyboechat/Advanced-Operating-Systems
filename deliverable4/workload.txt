@@ -1,0 +1,43 @@
+# Sample paging workload. Run it with:
+#   go run . mem -algo fifo -frames 4 -file workload.txt
+#   go run . mem -algo both -frames 4 -file workload.txt -sweep 6
+#
+# Operations:
+#   alloc <pid> <pages>     give a process a virtual address space (nothing loaded yet)
+#   access <pid> <page>...  reference pages; the word "access" may be left out
+#   free <pid>              deallocate a process and release its frames
+#   frames                  print the memory map
+#   stats                   print memory usage and page faults per process
+
+# Three processes ask for 8 pages in total; with 4 frames memory overflows.
+alloc P1 4
+alloc P2 2
+alloc P3 2
+
+# Memory fills up: the first four distinct pages each fault into a free frame.
+access P1 0 1 2
+P1 0
+P2 0
+
+# From here on every fault has to replace a page. P1 keeps going back to
+# page 0: LRU keeps it resident, FIFO evicts it because it was loaded first.
+P1 0 1
+P3 0
+P1 0 3
+P2 0 1
+frames
+
+# Page 5 is outside P2's 2-page address space: a segmentation fault, not a page fault.
+P2 5
+
+# P2 terminates; its frames become free and the next faults use them
+# instead of replacing a page.
+free P2
+P1 0 1
+P3 0 1
+P1 0 2
+stats
+
+P3 0 1
+P1 0 3 0
+frames
